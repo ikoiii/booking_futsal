@@ -15,6 +15,7 @@ import {
   Shield,
   ArrowRight
 } from 'lucide-react';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 interface Booking {
   id: number;
@@ -168,251 +169,253 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="container mx-auto p-4 md:p-8">
-      {/* === WELCOME SECTION === */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">
-          Selamat Datang, {user.nama.split(' ')[0]}! 👋
-        </h1>
-        <p className="text-muted-foreground">
-          Ini adalah dashboard Anda. Kelola booking dan informasi akun Anda di sini.
-        </p>
-      </div>
+    <ProtectedRoute requiredRole="user">
+      <main className="container mx-auto p-4 md:p-8">
+        {/* === WELCOME SECTION === */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">
+            Selamat Datang, {user.nama.split(' ')[0]}! 👋
+          </h1>
+          <p className="text-muted-foreground">
+            Ini adalah dashboard Anda. Kelola booking and informasi akun Anda di sini.
+          </p>
+        </div>
 
-      {/* === QUICK ACTIONS === */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card>
-          <CardContent className="p-6 text-center">
-            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Calendar className="w-6 h-6 text-primary" />
-            </div>
-            <h3 className="font-semibold mb-2">Booking Baru</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Pesan lapangan futsal untuk sesi bermain Anda
-            </p>
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={() => window.location.href = '/lapangan'}
-            >
-              Cari Lapangan
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6 text-center">
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <BookOpen className="w-6 h-6 text-green-600" />
-            </div>
-            <h3 className="font-semibold mb-2">Lihat Booking</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Periksa status dan detail booking Anda
-            </p>
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={() => window.location.href = '/profile'}
-            >
-              Lihat Semua
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6 text-center">
-            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Shield className="w-6 h-6 text-purple-600" />
-            </div>
-            <h3 className="font-semibold mb-2">Profil Saya</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Kelola informasi pribadi dan pengaturan akun
-            </p>
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={() => window.location.href = '/profile'}
-            >
-              Edit Profil
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* === RECENT BOOKINGS === */}
-      <Card className="mb-8">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-xl">Booking Terbaru</CardTitle>
-              <CardDescription>Daftar booking Anda yang terbaru</CardDescription>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => window.location.href = '/profile'}
-            >
-              Lihat Semua Booking
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {bookings.length === 0 ? (
-            <div className="text-center py-8">
-              <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <p className="text-muted-foreground mb-2">Belum ada booking</p>
-              <p className="text-sm text-muted-foreground">
-                Buat booking pertama Anda sekarang!
+        {/* === QUICK ACTIONS === */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Calendar className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="font-semibold mb-2">Booking Baru</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Pesan lapangan futsal untuk sesi bermain Anda
               </p>
               <Button 
-                className="mt-4"
+                variant="outline" 
+                className="w-full"
                 onClick={() => window.location.href = '/lapangan'}
               >
                 Cari Lapangan
               </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <BookOpen className="w-6 h-6 text-green-600" />
+              </div>
+              <h3 className="font-semibold mb-2">Lihat Booking</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Periksa status and detail booking Anda
+              </p>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => window.location.href = '/profile'}
+              >
+                Lihat Semua
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6 text-center">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="w-6 h-6 text-purple-600" />
+              </div>
+              <h3 className="font-semibold mb-2">Profil Saya</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Kelola informasi pribadi and pengaturan akun
+              </p>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => window.location.href = '/profile'}
+              >
+                Edit Profil
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* === RECENT BOOKINGS === */}
+        <Card className="mb-8">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xl">Booking Terbaru</CardTitle>
+                <CardDescription>Daftar booking Anda yang terbaru</CardDescription>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => window.location.href = '/profile'}
+              >
+                Lihat Semua Booking
+              </Button>
             </div>
-          ) : (
-            <div className="space-y-4">
-              {bookings.slice(0, 3).map((booking) => (
-                <div key={booking.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="font-semibold">{booking.lapangan_nama}</div>
-                      <Badge className={getStatusColor(booking.status)}>
-                        {getStatusIcon(booking.status)} {booking.status}
-                      </Badge>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold">Rp {booking.total_harga.toLocaleString('id-ID')}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {new Date(booking.tanggal).toLocaleDateString('id-ID')}
+          </CardHeader>
+          <CardContent>
+            {bookings.length === 0 ? (
+              <div className="text-center py-8">
+                <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                <p className="text-muted-foreground mb-2">Belum ada booking</p>
+                <p className="text-sm text-muted-foreground">
+                  Buat booking pertama Anda sekarang!
+                </p>
+                <Button 
+                  className="mt-4"
+                  onClick={() => window.location.href = '/lapangan'}
+                >
+                  Cari Lapangan
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {bookings.slice(0, 3).map((booking) => (
+                  <div key={booking.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="font-semibold">{booking.lapangan_nama}</div>
+                        <Badge className={getStatusColor(booking.status)}>
+                          {getStatusIcon(booking.status)} {booking.status}
+                        </Badge>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold">Rp {booking.total_harga.toLocaleString('id-ID')}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {new Date(booking.tanggal).toLocaleDateString('id-ID')}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      <span>{booking.jam_mulai} - {booking.jam_selesai}</span>
+                    
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        <span>{booking.jam_mulai} - {booking.jam_selesai}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        <span>Lapangan Futsal</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      <span>Lapangan Futsal</span>
-                    </div>
-                  </div>
 
-                  <div className="flex items-center gap-2">
-                    {booking.status !== 'cancelled' && booking.status !== 'completed' && (
+                    <div className="flex items-center gap-2">
+                      {booking.status !== 'cancelled' && booking.status !== 'completed' && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleCancelBooking(booking.id)}
+                        >
+                          Batalkan
+                        </Button>
+                      )}
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => handleCancelBooking(booking.id)}
+                        onClick={() => window.location.href = `/lapangan/${booking.lapangan_id}`}
                       >
-                        Batalkan
+                        Lihat Lapangan
                       </Button>
-                    )}
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => window.location.href = `/lapangan/${booking.lapangan_id}`}
-                    >
-                      Lihat Lapangan
-                    </Button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* === ACCOUNT SUMMARY === */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Informasi Akun</CardTitle>
-            <CardDescription>Detail akun Anda</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-3">
-              <User className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <div className="font-medium">{user.nama}</div>
-                <div className="text-sm text-muted-foreground">Nama Lengkap</div>
+                ))}
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <CreditCard className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <div className="font-medium">{user.email}</div>
-                <div className="text-sm text-muted-foreground">Email</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Shield className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <div className="font-medium">{user.no_telp || '-'}</div>
-                <div className="text-sm text-muted-foreground">No. Telepon</div>
-              </div>
-            </div>
-            <div className="pt-2">
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => window.location.href = '/profile'}
-              >
-                Kelola Profil
-              </Button>
-            </div>
+            )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Statistik Booking</CardTitle>
-            <CardDescription>Riwayat aktivitas Anda</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold text-green-600">
-                  {bookings.filter(b => b.status === 'confirmed').length}
+        {/* === ACCOUNT SUMMARY === */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Informasi Akun</CardTitle>
+              <CardDescription>Detail akun Anda</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-3">
+                <User className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <div className="font-medium">{user.nama}</div>
+                  <div className="text-sm text-muted-foreground">Nama Lengkap</div>
                 </div>
-                <div className="text-sm text-muted-foreground">Aktif</div>
               </div>
-              <div>
-                <div className="text-2xl font-bold text-blue-600">
-                  {bookings.filter(b => b.status === 'completed').length}
+              <div className="flex items-center gap-3">
+                <CreditCard className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <div className="font-medium">{user.email}</div>
+                  <div className="text-sm text-muted-foreground">Email</div>
                 </div>
-                <div className="text-sm text-muted-foreground">Selesai</div>
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold text-yellow-600">
-                  {bookings.filter(b => b.status === 'pending').length}
+              <div className="flex items-center gap-3">
+                <Shield className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <div className="font-medium">{user.no_telp || '-'}</div>
+                  <div className="text-sm text-muted-foreground">No. Telepon</div>
                 </div>
-                <div className="text-sm text-muted-foreground">Menunggu</div>
               </div>
-              <div>
-                <div className="text-2xl font-bold text-red-600">
-                  {bookings.filter(b => b.status === 'cancelled').length}
+              <div className="pt-2">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => window.location.href = '/profile'}
+                >
+                  Kelola Profil
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Statistik Booking</CardTitle>
+              <CardDescription>Riwayat aktivitas Anda</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {bookings.filter(b => b.status === 'confirmed').length}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Aktif</div>
                 </div>
-                <div className="text-sm text-muted-foreground">Dibatalkan</div>
+                <div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {bookings.filter(b => b.status === 'completed').length}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Selesai</div>
+                </div>
               </div>
-            </div>
-            <div className="pt-2">
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => window.location.href = '/profile'}
-              >
-                Lihat Detail
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </main>
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {bookings.filter(b => b.status === 'pending').length}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Menunggu</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-red-600">
+                    {bookings.filter(b => b.status === 'cancelled').length}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Dibatalkan</div>
+                </div>
+              </div>
+              <div className="pt-2">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => window.location.href = '/profile'}
+                >
+                  Lihat Detail
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    </ProtectedRoute>
   );
 }
