@@ -9,8 +9,31 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { useState, useEffect } from 'react';
+import { User } from '@/lib/database.types';
+import LogoutButton from './auth/LogoutButton';
 
 export default function Header() {
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    // Check authentication status
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/session')
+        const data = await response.json()
+        
+        if (data.authenticated && data.user) {
+          setUser(data.user)
+        }
+      } catch (error) {
+        console.error('Failed to check auth status:', error)
+      }
+    }
+
+    checkAuth()
+  }, [])
+
   return (
     <header className="border-b sticky top-0 bg-background z-10">
       <div className="container mx-auto p-4 flex justify-between items-center">
@@ -42,12 +65,23 @@ export default function Header() {
         </div>
         
         <div className="flex gap-2">
-          <Link href="/login">
-            <Button variant="outline">Login</Button>
-          </Link>
-          <Link href="/register">
-            <Button>Daftar</Button>
-          </Link>
+          {user ? (
+            <>
+              <Link href="/dashboard">
+                <Button variant="outline">Dashboard</Button>
+              </Link>
+              <LogoutButton />
+            </>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button variant="outline">Login</Button>
+              </Link>
+              <Link href="/register">
+                <Button>Daftar</Button>
+              </Link>
+            </>
+          )}
         </div>
 
       </div>

@@ -1,6 +1,15 @@
 // Authentication helper functions
-import { dbHelpers } from './database';
+import { UserHelpers, BookingHelpers } from './database.helpers';
 import bcrypt from 'bcryptjs';
+
+// Create dbHelpers object to maintain compatibility
+const dbHelpers = {
+  getUserByEmail: UserHelpers.getUserByEmail,
+  getUserById: UserHelpers.getUserById,
+  createUser: UserHelpers.createUser,
+  updateUser: UserHelpers.updateUser,
+  checkAvailability: BookingHelpers.checkAvailability
+};
 
 export interface User {
   id: number;

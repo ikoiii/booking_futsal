@@ -11,9 +11,12 @@ import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import WelcomeModal from './WelcomeModal';
 
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [userInfo, setUserInfo] = useState<{ name: string; role: string } | null>(null);
   const router = useRouter();
 
   const {
@@ -40,7 +43,8 @@ export default function LoginForm() {
 
       if (result.success) {
         toast.success('Login berhasil!');
-        router.push('/');
+        setUserInfo({ name: result.user.nama, role: result.user.role });
+        setShowWelcomeModal(true);
       } else {
         toast.error(result.message || 'Login gagal');
       }
@@ -111,6 +115,17 @@ export default function LoginForm() {
           </Link>
         </p>
       </div>
+
+      {/* Welcome Modal */}
+      <WelcomeModal
+        isOpen={showWelcomeModal}
+        onClose={() => {
+          setShowWelcomeModal(false);
+          router.push('/');
+        }}
+        userName={userInfo?.name || ''}
+        userRole={userInfo?.role as 'user' | 'admin'}
+      />
     </div>
   );
 }
