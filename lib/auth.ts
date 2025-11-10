@@ -1,31 +1,15 @@
 // Authentication helper functions
-import { UserHelpers, BookingHelpers } from './database.helpers';
+import { UserHelpers } from './database.helpers';
 import bcrypt from 'bcryptjs';
+import { authConfig } from '../config/auth';
+import type { User, AuthUser } from '../types/api';
 
-// Create dbHelpers object to maintain compatibility
-const dbHelpers = {
-  getUserByEmail: UserHelpers.getUserByEmail,
-  getUserById: UserHelpers.getUserById,
-  createUser: UserHelpers.createUser,
-  updateUser: UserHelpers.updateUser,
-  checkAvailability: BookingHelpers.checkAvailability
-};
-
-export interface User {
-  id: number;
-  nama: string;
-  email: string;
-  password?: string; // Make password optional
-  no_telp: string;
-  role: 'user' | 'admin';
-  created_at: string;
-  updated_at: string;
-}
+// Re-export User type for backwards compatibility
+export type { User } from '../types/api';
 
 // Hash password
 export async function hashPassword(password: string): Promise<string> {
-  const saltRounds = 12;
-  return await bcrypt.hash(password, saltRounds);
+  return await bcrypt.hash(password, authConfig.bcryptRounds);
 }
 
 // Verify password
@@ -42,7 +26,7 @@ export async function registerUser(userData: {
 }): Promise<User | null> {
   try {
     // Check if user already exists
-    const existingUser = await dbHelpers.getUserByEmail(userData.email);
+    const existingUser = await UserHelpers.getUserByEmail(userData.email);
     if (existingUser) {
       throw new Error('Email already exists');
     }
@@ -51,7 +35,7 @@ export async function registerUser(userData: {
     const hashedPassword = await hashPassword(userData.password);
 
     // Create user in database
-    const result = await dbHelpers.createUser({
+    await UserHelpers.createUser({
       nama: userData.nama,
       email: userData.email,
       password: hashedPassword,
@@ -59,7 +43,7 @@ export async function registerUser(userData: {
     });
 
     // Get the created user
-    const newUser = await dbHelpers.getUserByEmail(userData.email);
+    const newUser = await UserHelpers.getUserByEmail(userData.email);
     return newUser as User;
   } catch (error) {
     console.error('Registration failed:', error);
@@ -71,7 +55,7 @@ export async function registerUser(userData: {
 export async function loginUser(email: string, password: string): Promise<User | null> {
   try {
     // Get user by email
-    const user = await dbHelpers.getUserByEmail(email);
+    const user = await UserHelpers.getUserByEmail(email);
     if (!user) {
       throw new Error('Invalid email or password');
     }
@@ -95,7 +79,7 @@ export async function loginUser(email: string, password: string): Promise<User |
 // Get user by ID
 export async function getUserById(id: number): Promise<User | null> {
   try {
-    const user = await dbHelpers.getUserById(id);
+    const user = await UserHelpers.getUserById(id);
     if (!user) {
       return null;
     }
@@ -145,7 +129,7 @@ export async function updateUser(id: number, userData: Partial<{
   try {
     // Check if email is being changed and already exists
     if (userData.email) {
-      const existingUser = await dbHelpers.getUserByEmail(userData.email);
+      const existingUser = await UserHelpers.getUserByEmail(userData.email);
       if (existingUser && (existingUser as User).id !== id) {
         throw new Error('Email already exists');
       }
@@ -158,7 +142,7 @@ export async function updateUser(id: number, userData: Partial<{
     }
 
     // Update user in database
-    await dbHelpers.updateUser(id, updateData);
+    await UserHelpers.updateUser(id, updateData);
 
     // Get updated user
     const updatedUser = await getUserById(id);

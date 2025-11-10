@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { dbHelpers } from '@/lib/database';
+import { ReviewHelpers, BookingHelpers } from '@/lib/database.helpers';
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user has booked this lapangan
-    const booking = await dbHelpers.getBookingById(bookingId);
+    const booking = await BookingHelpers.getBookingById(bookingId);
     
     if (!booking || booking.user_id !== parseInt(userId)) {
       return NextResponse.json(
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already reviewed this booking
-    const existingReview = await dbHelpers.getReviewByBookingId(bookingId);
+    const existingReview = await ReviewHelpers.getReviewByBookingId(bookingId);
     
     if (existingReview) {
       return NextResponse.json(
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create the review
-    await dbHelpers.createReview({
+    await ReviewHelpers.createReview({
       user_id: parseInt(userId),
       lapangan_id: parseInt(lapanganId),
       booking_id: parseInt(bookingId),

@@ -1,19 +1,6 @@
 // Database connection configuration for MySQL with XAMPP
 import mysql from 'mysql2/promise'
-
-// Database configuration
-const dbConfig = {
-  host: 'localhost',
-  user: 'root', // Default XAMPP MySQL username
-  password: '', // Default XAMPP MySQL password (usually empty)
-  database: 'futsal_booking',
-  port: 3306, // Default MySQL port
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  acquireTimeout: 60000,
-  timeout: 60000
-}
+import { dbConfig } from '../config/database'
 
 // Create connection pool
 const pool = mysql.createPool(dbConfig)

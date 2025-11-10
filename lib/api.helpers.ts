@@ -1,4 +1,4 @@
-import type { ApiResponse } from './database.types'
+import type { ApiResponse } from '../types/api'
 
 // Standard API Response Helpers
 export class ApiHelpers {
@@ -192,7 +192,7 @@ export class ErrorHelpers {
   }
 
   static handleValidationError(errors: string[]): ApiResponse {
-    return ApiHelpers.badRequest('Validasi data gagal', errors.join(', '))
+    return ApiHelpers.error('Validasi data gagal', errors.join(', '))
   }
 
   static handleNotFoundError(entity: string): ApiResponse {

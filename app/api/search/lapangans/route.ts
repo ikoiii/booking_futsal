@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { dbHelpers } from '@/lib/database'
+import { LapanganHelpers } from '@/lib/database.helpers'
+import { executeQuery } from '@/lib/database'
 
 export async function GET(request: NextRequest) {
   try {
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
     query += ' ORDER BY harga_per_jam'
     
     // Execute query
-    const results = await dbHelpers.executeQuery(query, params)
+    const results = await executeQuery(query, params)
     
     return NextResponse.json({
       success: true,

@@ -1,12 +1,12 @@
 import { executeQuery, executeTransaction } from './database'
-import type { 
-  User, 
-  Lapangan, 
-  Booking, 
-  Review, 
-  AvailabilityCheck, 
-  SearchParams 
-} from './database.types'
+import type {
+  User,
+  Lapangan,
+  Booking,
+  Review,
+  AvailabilityCheck,
+  SearchParams
+} from '../types/api'
 
 // User Management
 export class UserHelpers {
@@ -32,13 +32,13 @@ export class UserHelpers {
 
   static async getUserByEmail(email: string): Promise<User | null> {
     const query = 'SELECT * FROM users WHERE email = ?'
-    const results = await executeQuery(query, [email])
+    const results = await executeQuery(query, [email]) as User[]
     return results?.[0] || null
   }
 
   static async getUserById(id: number): Promise<User | null> {
     const query = 'SELECT * FROM users WHERE id = ?'
-    const results = await executeQuery(query, [id])
+    const results = await executeQuery(query, [id]) as User[]
     return results?.[0] || null
   }
 
@@ -78,7 +78,7 @@ export class UserHelpers {
 
   static async getAllUsers(): Promise<User[]> {
     const query = 'SELECT id, nama, email, no_telp, role, created_at, updated_at FROM users ORDER BY created_at DESC'
-    return await executeQuery(query)
+    return await executeQuery(query) as User[]
   }
 }
 
@@ -86,45 +86,45 @@ export class UserHelpers {
 export class LapanganHelpers {
   static async getAllLapangans() {
     const query = 'SELECT * FROM lapangans WHERE status = "aktif" ORDER BY harga_per_jam'
-    return await executeQuery(query)
+    return await executeQuery(query) as Lapangan[]
   }
 
   static async getLapanganById(id: number) {
     const query = 'SELECT * FROM lapangans WHERE id = ? AND status = "aktif"'
-    const results = await executeQuery(query, [id])
+    const results = await executeQuery(query, [id]) as Lapangan[]
     return results?.[0] || null
   }
 
   static async searchLapangans(params: SearchParams) {
     let query = `
-      SELECT * FROM lapangans 
+      SELECT * FROM lapangans
       WHERE status = 'aktif'
     `
     const paramsArray: any[] = []
-    
+
     if (params.keyword) {
       query += ' AND (nama LIKE ? OR deskripsi LIKE ?)'
       paramsArray.push(`%${params.keyword}%`, `%${params.keyword}%`)
     }
-    
+
     if (params.location) {
       query += ' AND lokasi LIKE ?'
       paramsArray.push(`%${params.location}%`)
     }
-    
+
     if (params.minPrice !== undefined) {
       query += ' AND harga_per_jam >= ?'
       paramsArray.push(params.minPrice)
     }
-    
+
     if (params.maxPrice !== undefined) {
       query += ' AND harga_per_jam <= ?'
       paramsArray.push(params.maxPrice)
     }
-    
+
     query += ' ORDER BY harga_per_jam'
-    
-    return await executeQuery(query, paramsArray)
+
+    return await executeQuery(query, paramsArray) as Lapangan[]
   }
 }
 
@@ -157,7 +157,7 @@ export class BookingHelpers {
       total_harga
     ])
     
-    const insertIdResult = await executeQuery('SELECT LAST_INSERT_ID() as id', [])
+    const insertIdResult = await executeQuery('SELECT LAST_INSERT_ID() as id', []) as any[]
     const newBookingId = insertIdResult?.[0]?.id
     
     return await this.getBookingById(newBookingId)
@@ -165,9 +165,9 @@ export class BookingHelpers {
 
   static async getBookingsByUserId(userId: number) {
     const query = `
-      SELECT 
-        b.*, 
-        l.nama as lapangan_name, 
+      SELECT
+        b.*,
+        l.nama as lapangan_name,
         l.gambar as lapangan_gambar,
         l.lokasi as lapangan_lokasi
       FROM bookings b
@@ -175,14 +175,14 @@ export class BookingHelpers {
       WHERE b.user_id = ?
       ORDER BY b.tanggal DESC, b.jam_mulai DESC
     `
-    return await executeQuery(query, [userId])
+    return await executeQuery(query, [userId]) as Booking[]
   }
 
   static async getBookingById(id: number) {
     const query = `
-      SELECT 
-        b.*, 
-        l.nama as lapangan_name, 
+      SELECT
+        b.*,
+        l.nama as lapangan_name,
         l.gambar as lapangan_gambar,
         l.lokasi as lapangan_lokasi,
         u.nama as user_name,
@@ -192,16 +192,16 @@ export class BookingHelpers {
       JOIN users u ON b.user_id = u.id
       WHERE b.id = ?
     `
-    const results = await executeQuery(query, [id])
+    const results = await executeQuery(query, [id]) as Booking[]
     return results?.[0] || null
   }
 
   static async getAllBookings() {
     const query = `
-      SELECT 
-        b.*, 
-        u.nama as user_name, 
-        u.email as user_email, 
+      SELECT
+        b.*,
+        u.nama as user_name,
+        u.email as user_email,
         l.nama as lapangan_name,
         l.lokasi as lapangan_lokasi
       FROM bookings b
@@ -209,7 +209,7 @@ export class BookingHelpers {
       JOIN lapangans l ON b.lapangan_id = l.id
       ORDER BY b.tanggal DESC, b.jam_mulai DESC
     `
-    return await executeQuery(query)
+    return await executeQuery(query) as Booking[]
   }
 
   static async checkAvailability(lapanganId: number, tanggal: string, jamMulai: number, jamSelesai: number) {
@@ -228,7 +228,7 @@ export class BookingHelpers {
     const results = await executeQuery(query, [
       lapanganId, tanggal, jamMulai, jamSelesai,
       jamMulai, jamSelesai, jamMulai, jamSelesai
-    ])
+    ]) as any[]
     return results?.[0] || { conflict_count: 0 }
   }
 
@@ -277,31 +277,31 @@ export class ReviewHelpers {
       WHERE r.lapangan_id = ?
       ORDER BY r.created_at DESC
     `
-    return await executeQuery(query, [lapanganId])
+    return await executeQuery(query, [lapanganId]) as Review[]
   }
 
   static async getAverageRating(lapanganId: number) {
     const query = `
-      SELECT 
-        AVG(rating) as avg_rating, 
+      SELECT
+        AVG(rating) as avg_rating,
         COUNT(*) as total_reviews,
         GROUP_CONCAT(rating) as rating_distribution
       FROM reviews
       WHERE lapangan_id = ?
     `
-    const results = await executeQuery(query, [lapanganId])
+    const results = await executeQuery(query, [lapanganId]) as any[]
     return results?.[0] || { avg_rating: 0, total_reviews: 0 }
   }
 
   static async getReviewByBookingId(bookingId: number) {
     const query = 'SELECT * FROM reviews WHERE booking_id = ?'
-    const results = await executeQuery(query, [bookingId])
+    const results = await executeQuery(query, [bookingId]) as Review[]
     return results?.[0] || null
   }
 
   static async hasUserReviewed(userId: number, lapanganId: number) {
     const query = 'SELECT COUNT(*) as has_reviewed FROM reviews WHERE user_id = ? AND lapangan_id = ?'
-    const results = await executeQuery(query, [userId, lapanganId])
+    const results = await executeQuery(query, [userId, lapanganId]) as any[]
     return results?.[0]?.has_reviewed > 0
   }
 }
@@ -310,35 +310,35 @@ export class ReviewHelpers {
 export class AnalyticsHelpers {
   static async getBookingStats() {
     const query = `
-      SELECT 
+      SELECT
         status,
         COUNT(*) as count,
         ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM bookings), 2) as percentage
-      FROM bookings 
+      FROM bookings
       WHERE status != 'cancelled'
       GROUP BY status
     `
-    return await executeQuery(query)
+    return await executeQuery(query) as any[]
   }
 
   static async getRevenueStats() {
     const query = `
-      SELECT 
+      SELECT
         DATE(tanggal) as date,
         COUNT(*) as bookings_count,
         SUM(total_harga) as total_revenue
-      FROM bookings 
+      FROM bookings
       WHERE status = 'completed'
       GROUP BY DATE(tanggal)
       ORDER BY date DESC
       LIMIT 30
     `
-    return await executeQuery(query)
+    return await executeQuery(query) as any[]
   }
 
   static async getPopularLapangans() {
     const query = `
-      SELECT 
+      SELECT
         l.id,
         l.nama,
         l.lokasi,
@@ -352,6 +352,6 @@ export class AnalyticsHelpers {
       ORDER BY booking_count DESC
       LIMIT 10
     `
-    return await executeQuery(query)
+    return await executeQuery(query) as any[]
   }
 }

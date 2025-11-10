@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Calendar, Clock, MapPin } from 'lucide-react';
-import { Lapangan } from "@/lib/mock-data";
+import { Lapangan } from "@/types/api";
 
 export default function HomePage() {
   return (
@@ -60,7 +60,7 @@ export default function HomePage() {
                   />
                   {/* Badge Harga */}
                   <Badge className="absolute top-3 right-3 bg-primary hover:bg-primary/90" variant="default">
-                    Rp {lapangan.hargaPerJam.toLocaleString('id-ID')} / jam
+                    Rp {(lapangan.harga_per_jam || lapangan.hargaPerJam || 0).toLocaleString('id-ID')} / jam
                   </Badge>
                 </div>
                 <CardContent className="p-6">

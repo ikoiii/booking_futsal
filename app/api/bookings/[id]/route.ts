@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { dbHelpers } from '@/lib/database'
+import { BookingHelpers } from '@/lib/database.helpers'
 import { auth } from '@/lib/auth'
+import { executeQuery } from '@/lib/database'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       JOIN lapangans l ON b.lapangan_id = l.id 
       WHERE b.id = $1
     `
-    const bookingResult = await dbHelpers.executeQuery(bookingQuery, [bookingId])
+    const bookingResult = await executeQuery(bookingQuery, [bookingId])
     const booking = Array.isArray(bookingResult) ? bookingResult[0] : null
     if (!booking) {
       return NextResponse.json(
@@ -115,7 +116,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     // Update booking status
     const updateQuery = 'UPDATE bookings SET status = $1, updated_at = NOW() WHERE id = $2'
-    await dbHelpers.executeQuery(updateQuery, [status, bookingId])
+    await executeQuery(updateQuery, [status, bookingId])
 
     return NextResponse.json({
       success: true,
@@ -162,7 +163,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       JOIN lapangans l ON b.lapangan_id = l.id 
       WHERE b.id = $1
     `
-    const bookingResult = await dbHelpers.executeQuery(bookingQuery, [bookingId])
+    const bookingResult = await executeQuery(bookingQuery, [bookingId])
     const booking = Array.isArray(bookingResult) ? bookingResult[0] : null
     if (!booking) {
       return NextResponse.json(
@@ -196,7 +197,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     // Cancel booking
     const cancelQuery = 'UPDATE bookings SET status = $1, updated_at = NOW() WHERE id = $2'
-    await dbHelpers.executeQuery(cancelQuery, ['cancelled', bookingId])
+    await executeQuery(cancelQuery, ['cancelled', bookingId])
 
     return NextResponse.json({
       success: true,

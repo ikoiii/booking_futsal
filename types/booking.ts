@@ -1,27 +1,19 @@
-// Database Types and Interfaces
-
-export interface User {
-  id: number
-  nama: string
-  email: string
-  password?: string
-  no_telp: string
-  role: 'user' | 'admin'
-  created_at: string
-  updated_at: string
-}
+// Booking related types and interfaces
 
 export interface Lapangan {
   id: number
   nama: string
   lokasi: string
   harga_per_jam: number
-  fasilitas: string
+  // Support both string and array format for backward compatibility
+  fasilitas: string | string[]
   gambar: string
   deskripsi: string
   status: 'aktif' | 'nonaktif'
   created_at: string
   updated_at: string
+  // Legacy support
+  hargaPerJam?: number
 }
 
 export interface Booking {
@@ -41,19 +33,7 @@ export interface Booking {
   user_email?: string
   lapangan_name?: string
   lapangan_gambar?: string
-}
-
-export interface Review {
-  id: number
-  user_id: number
-  lapangan_id: number
-  booking_id: number
-  rating: number
-  komentar: string
-  created_at: string
-  updated_at: string
-  // Extended with joins
-  user_name?: string
+  lapangan_lokasi?: string
 }
 
 export interface AvailabilityCheck {
@@ -72,44 +52,9 @@ export interface SearchParams {
   facilities?: string[]
 }
 
-// Request/Response Types
-export interface ApiResponse<T = any> {
-  success: boolean
-  data?: T
-  message?: string
-  error?: string
-}
-
-export interface AuthUser {
-  id: number
-  nama: string
-  email: string
-  no_telp: string
-  role: 'user' | 'admin'
-}
-
-// Form Data Types
-export interface RegisterFormData {
-  nama: string
-  email: string
-  password: string
-  no_telp: string
-}
-
-export interface LoginFormData {
-  email: string
-  password: string
-}
-
 export interface BookingFormData {
   lapangan_id: number
   tanggal: string
   jam_mulai: number
   jam_selesai: number
-}
-
-export interface ReviewFormData {
-  booking_id: number
-  rating: number
-  komentar: string
 }

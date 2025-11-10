@@ -10,7 +10,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { useState, useEffect } from 'react';
-import { User } from '@/lib/database.types';
+import { User } from '@/types/api';
 import LogoutButton from './auth/LogoutButton';
 
 export default function Header() {

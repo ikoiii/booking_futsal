@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { dbHelpers } from '@/lib/database'
+import { BookingHelpers } from '@/lib/database.helpers'
 import { auth } from '@/lib/auth'
+import { executeQuery } from '@/lib/database'
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,14 +18,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all bookings
-    const query = `
-      SELECT b.*, u.name as user_name, u.email, l.name as lapangan_name 
-      FROM bookings b 
-      JOIN users u ON b.user_id = u.id 
-      JOIN lapangans l ON b.lapangan_id = l.id 
-      ORDER BY b.created_at DESC
-    `
-    const bookings = await dbHelpers.executeQuery(query)
+    const bookings = await BookingHelpers.getAllBookings()
     
     return NextResponse.json({
       success: true,

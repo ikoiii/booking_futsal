@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { dbHelpers } from '@/lib/database'
+import { UserHelpers } from '@/lib/database.helpers'
 import { auth } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
@@ -17,12 +17,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all users
-    const query = `
-      SELECT id, name, email, role, created_at, updated_at 
-      FROM users 
-      ORDER BY created_at DESC
-    `
-    const users = await dbHelpers.executeQuery(query)
+    const users = await UserHelpers.getAllUsers()
     
     return NextResponse.json({
       success: true,

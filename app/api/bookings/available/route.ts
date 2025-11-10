@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { dbHelpers } from '@/lib/database'
 import { LapanganHelpers, BookingHelpers } from '@/lib/database.helpers'
 
 export async function GET(request: NextRequest) {

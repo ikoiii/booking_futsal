@@ -150,9 +150,10 @@ export const reviewSchema = z.object({
     .positive('Booking tidak valid'),
 });
 
-// Type definitions
+// Re-export types from types directory
 export type RegisterFormData = z.infer<typeof registerSchema>;
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type ProfileFormData = z.infer<typeof profileSchema>;
 export type BookingFormData = z.infer<typeof bookingSchema>;
 export type ReviewFormData = z.infer<typeof reviewSchema>;
+

@@ -1,4 +1,4 @@
-import { Lapangan } from '@/lib/mock-data';
+import { Lapangan } from '@/types/api';
 
 // Data lapangan futsal dengan foto dari Unsplash
 export const lapanganData: Lapangan[] = [
@@ -17,7 +17,12 @@ export const lapanganData: Lapangan[] = [
       "Toilet bersih",
       "Wi-Fi gratis",
       "Ruang istirahat"
-    ]
+    ],
+    lokasi: "Jl. Pintu Satu Senayan, Jakarta Pusat",
+    harga_per_jam: 120000,
+    status: "aktif",
+    created_at: "2025-11-11",
+    updated_at: "2025-11-11"
   },
   {
     id: 2,
@@ -34,7 +39,12 @@ export const lapanganData: Lapangan[] = [
       "Toilet",
       "Wi-Fi",
       "Tempat duduk penonton"
-    ]
+    ],
+    lokasi: "Jl. Sudirman No. 45, Jakarta Selatan",
+    harga_per_jam: 100000,
+    status: "aktif",
+    created_at: "2025-11-11",
+    updated_at: "2025-11-11"
   },
   {
     id: 3,
@@ -51,7 +61,12 @@ export const lapanganData: Lapangan[] = [
       "Kamar ganti modern",
       "Toilet bersih",
       "Loker penyimpanan"
-    ]
+    ],
+    lokasi: "Jl. TB Simatupang No. 15, Jakarta Selatan",
+    harga_per_jam: 90000,
+    status: "aktif",
+    created_at: "2025-11-11",
+    updated_at: "2025-11-11"
   },
   {
     id: 4,
@@ -68,7 +83,12 @@ export const lapanganData: Lapangan[] = [
       "Toilet umum",
       "Tempat makan",
       "ATM center"
-    ]
+    ],
+    lokasi: "Jl. Salemba Raya No. 4, Jakarta Pusat",
+    harga_per_jam: 75000,
+    status: "aktif",
+    created_at: "2025-11-11",
+    updated_at: "2025-11-11"
   },
   {
     id: 5,
@@ -85,7 +105,12 @@ export const lapanganData: Lapangan[] = [
       "Kamar ganti mewah",
       "Locker pribadi",
       "Pelayanan concierge"
-    ]
+    ],
+    lokasi: "Jl. Kemang Raya No. 88, Jakarta Selatan",
+    harga_per_jam: 150000,
+    status: "aktif",
+    created_at: "2025-11-11",
+    updated_at: "2025-11-11"
   },
   {
     id: 6,
@@ -102,7 +127,12 @@ export const lapanganData: Lapangan[] = [
       "Toilet umum",
       "Area bermain anak",
       "Tempat sampah"
-    ]
+    ],
+    lokasi: "Jl. Kelapa Gading Boulevard, Jakarta Utara",
+    harga_per_jam: 65000,
+    status: "aktif",
+    created_at: "2025-11-11",
+    updated_at: "2025-11-11"
   }
 ];
 

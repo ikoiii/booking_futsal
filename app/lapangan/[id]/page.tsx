@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Lapangan, Booking } from '@/lib/mock-data';
+import { Lapangan, Booking } from '@/types/api';
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -177,7 +177,7 @@ export default function LapanganDetailPage() {
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <DollarSign className="w-4 h-4" />
-            <span>Rp {lapangan.hargaPerJam.toLocaleString('id-ID')} / jam</span>
+            <span>Rp {(lapangan.harga_per_jam || lapangan.hargaPerJam || 0).toLocaleString('id-ID')} / jam</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Users className="w-4 h-4" />
@@ -231,10 +231,10 @@ export default function LapanganDetailPage() {
             <CardContent>
               {lapangan.fasilitas && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {lapangan.fasilitas.map((fasilitas, index) => (
+                  {(Array.isArray(lapangan.fasilitas) ? lapangan.fasilitas : lapangan.fasilitas.split(',')).map((fasilitas, index) => (
                     <div key={index} className="flex items-center gap-3">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-sm">{fasilitas}</span>
+                      <span className="text-sm">{typeof fasilitas === 'string' ? fasilitas.trim() : fasilitas}</span>
                     </div>
                   ))}
                 </div>
@@ -249,7 +249,7 @@ export default function LapanganDetailPage() {
           <Card className="shadow-lg sticky top-24">
             <CardHeader>
               <p className="text-3xl font-bold">
-                Rp {lapangan.hargaPerJam.toLocaleString('id-ID')}
+                Rp {lapangan.harga_per_jam.toLocaleString('id-ID')}
                 <span className="text-base font-normal text-muted-foreground"> / jam</span>
               </p>
             </CardHeader>
@@ -302,7 +302,7 @@ export default function LapanganDetailPage() {
                                 <span className="text-muted-foreground">Nama:</span>
                                 <span className="font-medium">{lapangan.nama}</span>
                                 <span className="text-muted-foreground">Harga:</span>
-                                <span className="font-medium">Rp {lapangan.hargaPerJam.toLocaleString('id-ID')} / jam</span>
+                                <span className="font-medium">Rp {(lapangan.harga_per_jam || lapangan.hargaPerJam || 0).toLocaleString('id-ID')} / jam</span>
                                 <span className="text-muted-foreground">Tanggal:</span>
                                 <span className="font-medium">{tanggal?.toLocaleDateString('id-ID')}</span>
                                 <span className="text-muted-foreground">Jam:</span>
