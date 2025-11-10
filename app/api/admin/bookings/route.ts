@@ -17,7 +17,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all bookings
-    const bookings = await dbHelpers.getAllBookings()
+    const query = `
+      SELECT b.*, u.name as user_name, u.email, l.name as lapangan_name 
+      FROM bookings b 
+      JOIN users u ON b.user_id = u.id 
+      JOIN lapangans l ON b.lapangan_id = l.id 
+      ORDER BY b.created_at DESC
+    `
+    const bookings = await dbHelpers.executeQuery(query)
     
     return NextResponse.json({
       success: true,

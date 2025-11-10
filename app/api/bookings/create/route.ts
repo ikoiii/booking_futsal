@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { dbHelpers } from '@/lib/database'
+import { LapanganHelpers, BookingHelpers } from '@/lib/database.helpers'
 import { auth } from '@/lib/auth'
 import type { User } from '@/lib/auth'
 
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if lapangan exists and is active
-    const lapangan = await dbHelpers.getLapanganById(lapangan_id)
+    const lapangan = await LapanganHelpers.getLapanganById(lapangan_id)
     if (!lapangan) {
       return NextResponse.json(
         { error: 'Lapangan not found' }, 
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check availability
-    const availability = await dbHelpers.checkAvailability(
+    const availability = await BookingHelpers.checkAvailability(
       lapangan_id, 
       tanggal, 
       parseInt(jam_mulai), 
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       harga_per_jam: (lapangan as any).harga_per_jam,
     }
 
-    const result = await dbHelpers.createBooking(bookingData)
+    const result = await BookingHelpers.createBooking(bookingData)
     
     return NextResponse.json({
       success: true,

@@ -152,7 +152,7 @@ export default function AdminPage() {
                 <Calendar className="w-12 h-12 text-primary/20" />
               </div>
               <div className="mt-4 flex items-center gap-2">
-                <Badge variant="warning">{stats?.pendingBookings || 0} Pending</Badge>
+                <Badge variant="destructive">{stats?.pendingBookings || 0} Pending</Badge>
                 <span className="text-xs text-muted-foreground">hari ini</span>
               </div>
             </CardContent>
@@ -170,7 +170,7 @@ export default function AdminPage() {
                 <Users className="w-12 h-12 text-green-600/20" />
               </div>
               <div className="mt-4 flex items-center gap-2">
-                <Badge variant="success">Aktif</Badge>
+                <Badge variant="default">Aktif</Badge>
                 <span className="text-xs text-muted-foreground">bulan ini</span>
               </div>
             </CardContent>
@@ -265,8 +265,8 @@ export default function AdminPage() {
                       </div>
                       {activity.status && (
                         <Badge variant={
-                          activity.status === 'success' ? 'success' : 
-                          activity.status === 'pending' ? 'warning' : 'destructive'
+                          activity.status === 'success' ? 'default' : 
+                          activity.status === 'pending' ? 'destructive' : 'destructive'
                         }>
                           {activity.status}
                         </Badge>

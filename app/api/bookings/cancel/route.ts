@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { dbHelpers } from '@/lib/database';
+import { BookingHelpers } from '@/lib/database.helpers';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if booking exists and belongs to user
-    const booking = await dbHelpers.getBookingById(bookingId);
+    const booking = await BookingHelpers.getBookingById(bookingId);
     
     if (!booking) {
       return NextResponse.json(
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Cancel the booking
-    await dbHelpers.cancelBooking(bookingId);
+    await BookingHelpers.cancelBooking(bookingId);
 
     return NextResponse.json(
       { 

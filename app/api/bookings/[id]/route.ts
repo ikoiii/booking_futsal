@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { dbHelpers } from '@/lib/database'
 import { auth } from '@/lib/auth'
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Check authentication
     const session = request.headers.get('authorization')
@@ -16,7 +16,8 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const bookingId = parseInt(params.id)
+    const { id } = await params
+    const bookingId = parseInt(id)
     if (!bookingId || isNaN(bookingId)) {
       return NextResponse.json(
         { success: false, message: 'Invalid booking ID' },
@@ -25,7 +26,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     // Get booking details
-    const booking = await dbHelpers.getBookingById(bookingId)
+    const bookingQuery = `
+      SELECT b.*, u.name as user_name, u.email, l.name as lapangan_name, l.price_per_hour 
+      FROM bookings b 
+      JOIN users u ON b.user_id = u.id 
+      JOIN lapangans l ON b.lapangan_id = l.id 
+      WHERE b.id = $1
+    `
+    const bookingResult = await dbHelpers.executeQuery(bookingQuery, [bookingId])
+    const booking = Array.isArray(bookingResult) ? bookingResult[0] : null
     if (!booking) {
       return NextResponse.json(
         { success: false, message: 'Booking not found' },
@@ -34,7 +43,14 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     // Check if user owns this booking or is admin
-    if (booking.user_id !== user.id && user.role !== 'admin') {
+    if (typeof booking === 'object' && 'user_id' in booking) {
+      if (booking.user_id !== user.id && user.role !== 'admin') {
+        return NextResponse.json(
+          { error: 'Forbidden' },
+          { status: 403 }
+        )
+      }
+    } else {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -55,7 +71,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Check authentication
     const session = request.headers.get('authorization')
@@ -69,7 +85,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const bookingId = parseInt(params.id)
+    const { id } = await params
+    const bookingId = parseInt(id)
     if (!bookingId || isNaN(bookingId)) {
       return NextResponse.json(
         { success: false, message: 'Invalid booking ID' },
@@ -97,7 +114,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 
     // Update booking status
-    await dbHelpers.updateBookingStatus(bookingId, status)
+    const updateQuery = 'UPDATE bookings SET status = $1, updated_at = NOW() WHERE id = $2'
+    await dbHelpers.executeQuery(updateQuery, [status, bookingId])
 
     return NextResponse.json({
       success: true,
@@ -113,7 +131,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Check authentication
     const session = request.headers.get('authorization')
@@ -127,7 +145,8 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const bookingId = parseInt(params.id)
+    const { id } = await params
+    const bookingId = parseInt(id)
     if (!bookingId || isNaN(bookingId)) {
       return NextResponse.json(
         { success: false, message: 'Invalid booking ID' },
@@ -136,7 +155,15 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     // Get booking details
-    const booking = await dbHelpers.getBookingById(bookingId)
+    const bookingQuery = `
+      SELECT b.*, u.name as user_name, u.email, l.name as lapangan_name, l.price_per_hour 
+      FROM bookings b 
+      JOIN users u ON b.user_id = u.id 
+      JOIN lapangans l ON b.lapangan_id = l.id 
+      WHERE b.id = $1
+    `
+    const bookingResult = await dbHelpers.executeQuery(bookingQuery, [bookingId])
+    const booking = Array.isArray(bookingResult) ? bookingResult[0] : null
     if (!booking) {
       return NextResponse.json(
         { success: false, message: 'Booking not found' },
@@ -145,7 +172,14 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     // Check if user owns this booking (only user can cancel their own booking)
-    if (booking.user_id !== user.id && user.role !== 'admin') {
+    if (typeof booking === 'object' && 'user_id' in booking) {
+      if (booking.user_id !== user.id && user.role !== 'admin') {
+        return NextResponse.json(
+          { error: 'Forbidden' },
+          { status: 403 }
+        )
+      }
+    } else {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -161,7 +195,8 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     // Cancel booking
-    await dbHelpers.cancelBooking(bookingId)
+    const cancelQuery = 'UPDATE bookings SET status = $1, updated_at = NOW() WHERE id = $2'
+    await dbHelpers.executeQuery(cancelQuery, ['cancelled', bookingId])
 
     return NextResponse.json({
       success: true,

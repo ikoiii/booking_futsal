@@ -66,4 +66,11 @@ export async function executeTransaction(queries: Array<{ query: string; params?
   }
 }
 
+// Database helpers object
+export const dbHelpers = {
+  testConnection,
+  executeQuery,
+  executeTransaction
+}
+
 export default pool

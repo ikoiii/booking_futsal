@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { dbHelpers } from '@/lib/database'
+import { LapanganHelpers, BookingHelpers } from '@/lib/database.helpers'
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all lapangans
-    const lapangans = await dbHelpers.getAllLapangans()
+    const lapangans = await LapanganHelpers.getAllLapangans()
     
     if (!lapangans || !Array.isArray(lapangans) || lapangans.length === 0) {
       return NextResponse.json({
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
     const availableLapangans = []
     
     for (const lapangan of lapangans) {
-      const availability = await dbHelpers.checkAvailability(
+      const availability = await BookingHelpers.checkAvailability(
         (lapangan as any).id,
         tanggal,
         parseInt(jamMulai),

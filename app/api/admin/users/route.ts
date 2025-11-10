@@ -17,14 +17,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all users
-    const users = await dbHelpers.getAllUsers()
-    
-    // Remove sensitive information
-    const usersSafe = users.map(({ password, ...user }) => user)
+    const query = `
+      SELECT id, name, email, role, created_at, updated_at 
+      FROM users 
+      ORDER BY created_at DESC
+    `
+    const users = await dbHelpers.executeQuery(query)
     
     return NextResponse.json({
       success: true,
-      data: usersSafe || []
+      data: users || []
     }, { status: 200 })
 
   } catch (error) {
