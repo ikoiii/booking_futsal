@@ -7,6 +7,7 @@ export type Lapangan = {
   gambar: string;
   hargaPerJam: number;
   deskripsi: string;
+  fasilitas?: string[];
 };
 
 export type Booking = {

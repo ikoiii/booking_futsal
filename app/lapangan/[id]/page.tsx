@@ -1,6 +1,6 @@
 "use client"; 
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Lapangan, Booking } from '@/lib/mock-data';
 import { Calendar } from "@/components/ui/calendar";
@@ -10,22 +10,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Clock, DollarSign, Users, Shield } from 'lucide-react';
+import { useToast } from "@/components/ui/use-toast";
+import { MapPin, Clock, DollarSign, Users, Shield, Calendar as CalendarIcon } from 'lucide-react';
+import { getLapanganById } from '@/lib/lapangan';
 
-// (Data dan Logika tidak berubah)
 export default function LapanganDetailPage() {
   const params = useParams();
   const [tanggal, setTanggal] = useState<Date | undefined>(new Date());
+  const [selectedJam, setSelectedJam] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const { toast } = useToast();
   
   const lapanganId = Number(params.id);
-  // TODO: Ambil data lapangan dari database
-  const lapangan: Lapangan | undefined = {
-    id: lapanganId,
-    nama: "Loading...",
-    gambar: "/placeholder.jpg",
-    hargaPerJam: 0,
-    deskripsi: "Data sedang dimuat dari database..."
-  };
+  const [lapangan, setLapangan] = useState<Lapangan | null>(null);
 
   // TODO: Ambil data booking dari database
   const bookingsForThisLapangan: Booking[] = [];
@@ -38,18 +36,125 @@ export default function LapanganDetailPage() {
     { jam: 17, tersedia: true }, { jam: 18, tersedia: true },
     { jam: 19, tersedia: true }, { jam: 20, tersedia: true },
   ];
+
+  useEffect(() => {
+    const fetchLapangan = async () => {
+      try {
+        setLoading(true);
+        const lapanganData = getLapanganById(lapanganId);
+        if (lapanganData) {
+          setLapangan(lapanganData);
+        } else {
+          toast({
+            title: "Error",
+            description: "Lapangan tidak ditemukan.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching lapangan:', error);
+        toast({
+          title: "Error",
+          description: "Gagal memuat data lapangan.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (lapanganId) {
+      fetchLapangan();
+    }
+  }, [lapanganId, toast]);
   
   if (!lapangan) {
     return <div className="container p-8">Lapangan tidak ditemukan</div>;
   }
 
-  const handleBookingSubmit = (event: React.FormEvent) => {
+  const handleBookingSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
-    console.log("Nama:", formData.get('nama'));
-    console.log("Tanggal:", tanggal?.toISOString().split('T')[0]);
-    console.log("Jam:", formData.get('jam'));
-    alert("Booking berhasil (dummy)! Cek console log.");
+    
+    const nama = formData.get('nama') as string;
+    const email = formData.get('email') as string;
+    const no_telp = formData.get('no_telp') as string;
+    const tanggalBooking = tanggal?.toISOString().split('T')[0];
+    const jam = formData.get('jam') as string;
+    
+    try {
+      setBookingLoading(true);
+      
+      // Validasi data
+      if (!nama || !email || !no_telp || !tanggalBooking || !jam) {
+        toast({
+          title: "Error",
+          description: "Semua field harus diisi.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Cek autentikasi
+      const sessionResponse = await fetch('/api/auth/session');
+      if (!sessionResponse.ok) {
+        toast({
+          title: "Login Required",
+          description: "Silakan login terlebih dahulu untuk melakukan booking.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      const userData = await sessionResponse.json();
+      
+      // Submit booking
+      const bookingResponse = await fetch('/api/bookings/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          lapanganId: lapangan.id,
+          userId: userData.user.id,
+          tanggal: tanggalBooking,
+          jamMulai: parseInt(jam),
+          jamSelesai: parseInt(jam) + 1, // Durasi 1 jam
+          namaPemesan: nama,
+          email: email,
+          noTelp: no_telp,
+        }),
+      });
+      
+      const result = await bookingResponse.json();
+      
+      if (bookingResponse.ok) {
+        toast({
+          title: "Booking Berhasil",
+          description: `Booking untuk ${lapangan.nama} telah berhasil dilakukan.`,
+        });
+        // Close dialog and reset form
+        const dialog = event.currentTarget.closest('dialog');
+        if (dialog) {
+          dialog.close();
+        }
+      } else {
+        toast({
+          title: "Booking Gagal",
+          description: result.message || "Gagal melakukan booking.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting booking:', error);
+      toast({
+        title: "Error",
+        description: "Terjadi kesalahan saat melakukan booking.",
+        variant: "destructive",
+      });
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   // === BAGIAN RENDER (TAMPILAN) ===
@@ -124,32 +229,16 @@ export default function LapanganDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm">Rumput Sintetis Kualitas A</span>
+              {lapangan.fasilitas && (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {lapangan.fasilitas.map((fasilitas, index) => (
+                    <div key={index} className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm">{fasilitas}</span>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm">Kamar Ganti Pria & Wanita</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm">Area Parkir Luas</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm">Kantin & Area Tunggu</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm">Toilet Bersih</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm">Wi-Fi Gratis</span>
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -238,8 +327,25 @@ export default function LapanganDetailPage() {
                                 <Label htmlFor="syarat" className="text-sm">Saya menyetujui syarat dan ketentuan</Label>
                               </div>
                               <div className="flex gap-2">
-                                <Button type="submit" className="flex-1">Booking Sekarang</Button>
-                                <Button type="button" variant="outline" onClick={() => {}} className="flex-1">Batal</Button>
+                                <Button type="submit" className="flex-1" disabled={bookingLoading}>
+                                  {bookingLoading ? (
+                                    <>
+                                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                      Memproses...
+                                    </>
+                                  ) : (
+                                    "Booking Sekarang"
+                                  )}
+                                </Button>
+                                <Button type="button" variant="outline" onClick={(e) => {
+                                  const button = e.currentTarget;
+                                  const dialog = button.closest('dialog');
+                                  if (dialog) {
+                                    dialog.close();
+                                  }
+                                }} className="flex-1">
+                                  Batal
+                                </Button>
                               </div>
                             </form>
                           </div>
