@@ -19,24 +19,32 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Set session cookie (in real implementation, you would set HttpOnly cookie)
+    // Generate JWT token (in real implementation, use proper JWT library)
+    const token = Buffer.from(JSON.stringify({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      exp: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
+    })).toString('base64');
+
     const response = NextResponse.json(
       {
         success: true,
         message: 'Login berhasil',
-        user: user
+        user: user,
+        token: token
       },
       { status: 200 }
     );
-    
-    // In production, set HttpOnly, Secure cookies
-    response.cookies.set('userId', user.id.toString(), {
+
+    // Also set cookie as backup
+    response.cookies.set('auth-token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 60 * 60 * 24 * 7 // 1 week
     });
-    
+
     return response;
     
   } catch (error) {

@@ -23,6 +23,9 @@ export default function LogoutButton({ className }: LogoutButtonProps) {
       })
 
       if (response.ok) {
+        // Clear token from localStorage
+        localStorage.removeItem('token')
+
         toast.success('Logout berhasil!')
         router.push('/')
       } else {

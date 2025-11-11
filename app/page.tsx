@@ -6,8 +6,31 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Calendar, Clock, MapPin } from 'lucide-react';
 import { Lapangan } from "@/types/api";
+import { useLapangans } from '@/hooks/use-lapangans';
 
 export default function HomePage() {
+  const { lapangans, loading, error } = useLapangans();
+
+  if (loading) {
+    return (
+      <main className="container mx-auto p-4 md:p-8">
+        <div className="flex items-center justify-center min-h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="container mx-auto p-4 md:p-8">
+        <div className="text-center text-red-500">
+          <p>Error: {error}</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="container mx-auto p-4 md:p-8">
       
@@ -43,8 +66,7 @@ export default function HomePage() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* TODO: Tampilkan data lapangan dari database */}
-          {([] as Lapangan[]).map((lapangan) => (
+          {lapangans.map((lapangan) => (
             <div 
               key={lapangan.id} 
               className="overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group border-none hover:border-primary/20 cursor-pointer"

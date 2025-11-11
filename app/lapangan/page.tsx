@@ -8,24 +8,12 @@ import { MapPin, Clock, Search, Filter } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'react-hot-toast'
-
-interface Lapangan {
-  id: number
-  nama: string
-  lokasi: string
-  hargaPerJam: number
-  deskripsi: string
-  gambar: string
-  fasilitas: string[]
-  jamOperasional: string
-  rating: number
-  totalUlasan: number
-}
+import { Lapangan } from '@/types/api'
+import { useLapangans } from '@/hooks/use-lapangans'
 
 export default function LapanganPage() {
-  const [lapangans, setLapangans] = useState<Lapangan[]>([])
+  const { lapangans, loading, error, refetch } = useLapangans()
   const [searchTerm, setSearchTerm] = useState('')
-  const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({
     hargaMin: '',
     hargaMax: '',
@@ -33,29 +21,11 @@ export default function LapanganPage() {
     fasilitas: ''
   })
 
-  useEffect(() => {
-    fetchLapangans()
-  }, [])
-
-  const fetchLapangans = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch('/api/search/lapangans')
-      if (response.ok) {
-        const data = await response.json()
-        setLapangans(data.lapangans || [])
-      } else {
-        toast.error('Gagal memuat data lapangan')
-      }
-    } catch (error) {
-      toast.error('Terjadi kesalahan saat memuat data')
-    } finally {
-      setLoading(false)
-    }
-  }
-
+  
+  
   const handleSearch = async () => {
-    setLoading(true)
+    // Use loading from hook, no need to set manually
+    // setLoading(true)
     try {
       const queryParams = new URLSearchParams()
       if (searchTerm) queryParams.append('search', searchTerm)
@@ -67,14 +37,14 @@ export default function LapanganPage() {
       const response = await fetch(`/api/search/lapangans?${queryParams}`)
       if (response.ok) {
         const data = await response.json()
-        setLapangans(data.lapangans || [])
+        // Data handled by useLapangans hook
       } else {
         toast.error('Gagal mencari lapangan')
       }
     } catch (error) {
       toast.error('Terjadi kesalahan saat mencari')
     } finally {
-      setLoading(false)
+      // setLoading handled by useLapangans hook
     }
   }
 
@@ -82,15 +52,13 @@ export default function LapanganPage() {
     if (searchTerm && !lapangan.nama.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false
     }
-    if (filters.hargaMin && lapangan.hargaPerJam < parseInt(filters.hargaMin)) {
+    if (filters.hargaMin && (lapangan.harga_per_jam || lapangan.hargaPerJam || 0) < parseInt(filters.hargaMin)) {
       return false
     }
-    if (filters.hargaMax && lapangan.hargaPerJam > parseInt(filters.hargaMax)) {
+    if (filters.hargaMax && (lapangan.harga_per_jam || lapangan.hargaPerJam || 0) > parseInt(filters.hargaMax)) {
       return false
     }
-    if (filters.ratingMin && lapangan.rating < parseFloat(filters.ratingMin)) {
-      return false
-    }
+    // Rating filter disabled - not available in database yet
     return true
   })
 
@@ -221,7 +189,7 @@ export default function LapanganPage() {
                     />
                     {/* Badge Harga */}
                     <Badge className="absolute top-3 right-3 bg-primary hover:bg-primary/90" variant="default">
-                      Rp {lapangan.hargaPerJam.toLocaleString('id-ID')} / jam
+                      Rp {(lapangan.harga_per_jam || (lapangan.harga_per_jam || lapangan.hargaPerJam || 0) || 0).toLocaleString('id-ID')} / jam
                     </Badge>
                   </div>
                   <CardContent className="p-6">
@@ -236,11 +204,7 @@ export default function LapanganPage() {
                     </CardDescription>
                     
                     {/* Rating */}
-                    <div className="flex items-center gap-1 mb-4 text-sm">
-                      <span className="text-yellow-500">⭐</span>
-                      <span className="font-medium">{lapangan.rating}</span>
-                      <span className="text-muted-foreground">({lapangan.totalUlasan} ulasan)</span>
-                    </div>
+                    {/* Rating section - not available in database yet */}
 
                     <div className="flex items-center justify-between">
                       <Button 
@@ -255,7 +219,7 @@ export default function LapanganPage() {
                       </Button>
                       <div className="flex items-center gap-1 text-sm text-green-600">
                         <Clock className="w-3 h-3" />
-                        <span>{lapangan.jamOperasional}</span>
+                        <span>08:00 - 23:00</span>
                       </div>
                     </div>
 
@@ -264,7 +228,7 @@ export default function LapanganPage() {
                       <div className="mt-3">
                         <p className="text-xs text-muted-foreground mb-1">Fasilitas:</p>
                         <div className="flex flex-wrap gap-1">
-                          {lapangan.fasilitas.slice(0, 3).map((fasilitas, index) => (
+                          {(Array.isArray(lapangan.fasilitas) ? lapangan.fasilitas : lapangan.fasilitas.split(',')).slice(0, 3).map((fasilitas, index) => (
                             <Badge key={index} variant="secondary" className="text-xs">
                               {fasilitas}
                             </Badge>

@@ -42,6 +42,11 @@ export default function LoginForm() {
       const result = await response.json();
 
       if (result.success) {
+        // Save token to localStorage
+        if (result.token) {
+          localStorage.setItem('token', result.token);
+        }
+
         toast.success('Login berhasil!');
         setUserInfo({ name: result.user.nama, role: result.user.role });
         setShowWelcomeModal(true);

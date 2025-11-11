@@ -96,14 +96,29 @@ export async function getUserById(id: number): Promise<User | null> {
 // Get user from token (for API authentication)
 export async function getUserFromToken(token: string): Promise<User | null> {
   try {
-    // For now, we'll use a simple approach
-    // In production, you should use JWT or similar
-    const userId = parseInt(token);
-    if (isNaN(userId)) {
+    if (!token) {
       return null;
     }
-    
-    return await getUserById(userId);
+
+    // Parse base64 token
+    try {
+      const decoded = JSON.parse(Buffer.from(token, 'base64').toString());
+
+      // Check if token is expired
+      if (decoded.exp && decoded.exp < Date.now()) {
+        return null;
+      }
+
+      // Get full user data from database
+      return await getUserById(decoded.id);
+    } catch (parseError) {
+      // Fallback: treat token as simple user ID (backward compatibility)
+      const userId = parseInt(token);
+      if (isNaN(userId)) {
+        return null;
+      }
+      return await getUserById(userId);
+    }
   } catch (error) {
     console.error('Get user from token failed:', error);
     return null;
