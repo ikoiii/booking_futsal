@@ -1,140 +1,101 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserById } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get user ID from cookie
-    const userId = request.cookies.get('userId')?.value;
-    
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, message: 'Tidak ada sesi' },
-        { status: 401 }
-      );
+    // Check authentication via Bearer token
+    const session = request.headers.get('authorization')
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    
-    // Get user data
-    const user = await getUserById(parseInt(userId));
-    
+
+    const token = session.replace('Bearer ', '')
+    const user = await auth.getUserFromToken(token)
     if (!user) {
-      return NextResponse.json(
-        { success: false, message: 'User tidak ditemukan' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    
+
+    // Return user data in consistent format
     return NextResponse.json(
       {
         success: true,
-        user: user
+        data: {
+          id: user.id,
+          nama: user.nama,
+          email: user.email,
+          no_telp: user.no_telp,
+          role: user.role
+        }
       },
       { status: 200 }
     );
     
   } catch (error) {
-    console.error('Session API error:', error);
-    
-    const errorMessage = error instanceof Error ? error.message : 'Terjadi kesalahan';
-    return NextResponse.json(
-      {
-        success: false,
-        message: errorMessage
-      },
-      { status: 500 }
-    );
+    console.error('Session check failed:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Logout user by clearing cookie
-    const response = NextResponse.json(
-      {
-        success: true,
-        message: 'Logout berhasil'
-      },
-      { status: 200 }
-    );
-    
-    // Clear the session cookie
-    response.cookies.set('userId', '', {
+    // Clear auth-token cookie if exists
+    const response = NextResponse.json({
+      success: true,
+      message: 'Session cleared'
+    }, { status: 200 })
+
+    response.cookies.set('auth-token', '', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      expires: new Date(0) // Expire immediately
-    });
-    
-    return response;
-    
+      expires: new Date(0)
+    })
+
+    return response
+
   } catch (error) {
-    console.error('Logout API error:', error);
-    
-    const errorMessage = error instanceof Error ? error.message : 'Terjadi kesalahan';
-    return NextResponse.json(
-      {
-        success: false,
-        message: errorMessage
-      },
-      { status: 500 }
-    );
+    console.error('Session clear failed:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
-    // Get user ID from cookie
-    const userId = request.cookies.get('userId')?.value;
-    
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, message: 'Tidak ada sesi' },
-        { status: 401 }
-      );
+    // Check authentication via Bearer token
+    const session = request.headers.get('authorization')
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    
+
+    const token = session.replace('Bearer ', '')
+    const user = await auth.getUserFromToken(token)
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     // Parse request body
-    const body = await request.json();
-    const { name, email, phone } = body;
-    
-    // Get current user data
-    const currentUser = await getUserById(parseInt(userId));
-    
-    if (!currentUser) {
-      return NextResponse.json(
-        { success: false, message: 'User tidak ditemukan' },
-        { status: 404 }
-      );
+    const body = await request.json()
+    const { nama, email, no_telp } = body
+
+    // Update user data in database
+    const updatedUser = await auth.updateUser(user.id, {
+      nama: nama || user.nama,
+      email: email || user.email,
+      no_telp: no_telp || user.no_telp
+    })
+
+    if (!updatedUser) {
+      return NextResponse.json({ error: 'Failed to update user' }, { status: 500 })
     }
-    
-    // Update user data (in real app, you would update in database)
-    // For now, just return updated user data
-    const updatedUser = {
-      ...currentUser,
-      nama: name || currentUser.nama,
-      email: email || currentUser.email,
-      no_telp: phone || currentUser.no_telp,
-      updated_at: new Date().toISOString()
-    };
-    
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Profile updated successfully',
-        user: updatedUser
-      },
-      { status: 200 }
-    );
-    
+
+    return NextResponse.json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: updatedUser
+    }, { status: 200 })
+
   } catch (error) {
-    console.error('Update profile API error:', error);
-    
-    const errorMessage = error instanceof Error ? error.message : 'Terjadi kesalahan';
-    return NextResponse.json(
-      {
-        success: false,
-        message: errorMessage
-      },
-      { status: 500 }
-    );
+    console.error('Update profile failed:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
